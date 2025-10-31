@@ -1,0 +1,5 @@
+requests
+elasticsearch==8.15.0
+numpy
+scikit-learn
+urllib3

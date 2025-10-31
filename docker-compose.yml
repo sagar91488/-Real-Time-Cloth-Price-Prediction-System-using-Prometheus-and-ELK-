@@ -1,0 +1,90 @@
+version: "3.9"
+
+services:
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.15.3
+    container_name: elasticsearch
+    environment:
+      - discovery.type=single-node
+      - ES_JAVA_OPTS=-Xms1g -Xmx1g
+      - xpack.security.enabled=false
+    ports:
+      - "9200:9200"
+    volumes:
+      - esdata:/usr/share/elasticsearch/data
+    networks:
+      - clothnet
+    healthcheck:
+      test: ["CMD-SHELL", "curl -s http://localhost:9200 > /dev/null"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:8.15.3
+    container_name: kibana
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+    ports:
+      - "5601:5601"
+    depends_on:
+      - elasticsearch
+    networks:
+      - clothnet
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    ports:
+      - "9090:9090"
+    networks:
+      - clothnet
+
+  vardhman_exporter:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: vardhman_exporter
+    command: >
+      sh -c "echo '⏳ Waiting for Elasticsearch...' &&
+             until curl -s http://elasticsearch:9200 >/dev/null; do
+               echo '⚠️ Elasticsearch not ready yet... retrying in 5s';
+               sleep 5;
+             done;
+             echo '✅ Elasticsearch is up! Starting exporter...';
+             python vardhman_price_exporter.py"
+    environment:
+      - ELASTICSEARCH_HOST=http://elasticsearch:9200
+      - FETCH_INTERVAL=15
+    ports:
+      - "8000:8000"
+    depends_on:
+      - elasticsearch
+    networks:
+      - clothnet
+    restart: on-failure
+
+  vardhman_predictor:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: vardhman_predictor
+    command: ["python", "vardhman_predictor.py"]
+    environment:
+      - ELASTICSEARCH_HOST=http://elasticsearch:9200
+      - PRED_INTERVAL=30
+      - LOOKBACK=200
+    depends_on:
+      - elasticsearch
+    networks:
+      - clothnet
+    restart: on-failure
+
+volumes:
+  esdata:
+
+networks:
+  clothnet:
+    driver: bridge
