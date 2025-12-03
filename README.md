@@ -1,131 +1,160 @@
-🎯 AI-Based Cloth Price Prediction System using Machine Learning
-This project is a real-time cloth price prediction system that uses machine learning, Yahoo Finance API, Elasticsearch, Kibana, and Prometheus.
-It fetches live stock/cloth prices, analyzes them, predicts the next expected price, and visualizes everything in dashboards.
+🎯 Real-Time Cloth Price Prediction System using Prometheus and ELK
+This project is a real-time cloth/stock price prediction system that combines Machine Learning, Prometheus, and the ELK Stack (Elasticsearch + Kibana).
+It fetches the latest price from the internet, predicts the future value, stores everything in Elasticsearch, and shows live dashboards in Kibana and Prometheus.
 
 📌 Features
-🔹 Live Price Fetching
-Fetches the latest market/cloth price (e.g., Vardhman Textiles – VTL.NS) in real time.
+🔹 Real-Time Cloth/Stock Price Fetching
+Fetches latest market price (e.g., Vardhman Textiles – VTL.NS) automatically at fixed intervals.
 
-🔹 Automatic Prediction
-Applies machine-learning (Linear Regression) to calculate next predicted price.
+🔹 Machine Learning Prediction
+Uses a lightweight regression model to predict the upcoming cloth price.
 
-🔹 Stores Data in Elasticsearch
-Saves live + predicted prices with exact timestamps.
+🔹 Elasticsearch Storage
+Stores both actual & predicted prices with exact timestamps:
 
-🔹 Live Dashboards (Kibana)
-Beautiful charts showing
+price
 
-price variations
+predicted_price
 
-predicted values
+symbol
 
-time-wise trends
+company
 
-🔹 Prometheus Monitoring
-Live metrics for:
+timestamp
 
-current price
+🔹 Live Kibana Dashboard
+Visualizes:
 
-predicted price
+price trend
 
-last update timestamp
-Using /metrics endpoint.
+predicted vs actual values
 
-🔹 Docker Support
-Full stack (Elasticsearch + Kibana + Prometheus + Exporter + Predictor) runs with one command:
+time-series chart
+
+instant updates
+
+🔹 Prometheus Metrics Monitoring
+Exports real-time metrics via /metrics:
+
+nginx
+Copy code
+cloth_price_current  
+cloth_price_predicted  
+cloth_last_update_timestamp
+Prometheus displays continuously updated graphs of both current and predicted prices.
+
+🔹 Docker Automated Deployment
+Runs the entire system (ELK + Prometheus + Exporter + Predictor) using:
 
 css
 Copy code
 docker compose up --build
 🛠️ Technologies Used
-Python – core logic
+Python – Core logic
 
-Machine Learning (Linear Regression) – prediction
+Machine Learning (Linear Regression) – Prediction
 
-Elasticsearch – data storage
+Yahoo Finance API / Public Data – Live price source
 
-Kibana – live visualization
+Elasticsearch – Time-series storage
 
-Prometheus – monitoring + graphing
+Kibana – Visualization dashboard
 
-Yahoo Finance API – stock/cloth price source
+Prometheus – Monitoring & metrics scraping
 
-Docker & Docker Compose – deployment
+Docker & Docker Compose – Deployment
 
-Requests, Pandas, NumPy – data handling
+Pandas, NumPy, Requests – Data handling
 
 🧠 How It Works
 👉 1. Live Price Fetching
-Uses Yahoo Finance API to get latest cloth/stock price.
+A Python exporter retrieves the cloth/stock price from Yahoo Finance or a dataset URL.
 
 👉 2. Prediction Engine
-Reads historical prices from Elasticsearch
-→ Applies regression
-→ Predicts next price
-→ Saves prediction back to Elasticsearch.
+Another Python service fetches recent values from Elasticsearch → predicts next price → stores prediction.
 
-👉 3. Metrics Exporter
-Custom Python exporter exposes metrics to Prometheus:
+👉 3. Exporter for Prometheus
+A custom /metrics endpoint exposes:
 
-nginx
-Copy code
-vardhman_stock_price  
-vardhman_predicted_price  
-vardhman_last_update_timestamp
+latest price
+
+latest predicted price
+
+last update timestamp
+
+Prometheus scrapes and graphs these values every few seconds.
+
 👉 4. Data Visualization (Kibana)
-Shows:
+Kibana reads indexed data from Elasticsearch and displays:
 
-real-time price
+Real-time price charts
 
-predicted price
+Predicted vs actual
 
-continuous trend graphs
+Time-based trend analytics
 
-live changes every few seconds/minutes
+📁 Outputs
+📊 Elasticsearch
+Two indices:
 
-👉 5. Real-Time Monitoring (Prometheus)
-Shows:
+cloth_prices
 
-live updated metrics
+cloth_predictions
 
-accurate time-aligned graphs
+Each record includes:
 
-supports alerts & dashboards
+price
 
-📁 Output
-📄 Data Stored in Elasticsearch
-Live price document
+predicted_price
 
-Predicted price document
+timestamp
 
-Timestamp, company name, symbol
+symbol
 
-📊 Kibana Dashboard
-Line graphs of price vs prediction
+company name
 
-Time-based filters
-
-Real-time updates
-
-📡 Prometheus Metrics
-Example:
-
+📈 Prometheus Metrics Example
 nginx
 Copy code
-vardhman_stock_price 438.25
-vardhman_predicted_price 440.12
-vardhman_last_update_timestamp 1730589120
-📌 Use Case
-A practical tool for:
+cloth_price_current 438.25
+cloth_price_predicted 440.58
+cloth_last_update_timestamp 1730589120
+🖥️ Kibana Dashboards
+Line chart of live prices
 
-textile industries
+Prediction trend visualization
 
-stock-based cloth pricing analysis
+Auto-refresh every second
 
-price prediction dashboards
+🐳 How to Run the Full Project
+1️⃣ Clone the Repository
+sql
+Copy code
+git clone https://github.com/yourusername/Real-Time-Cloth-Price-Prediction-System-using-Prometheus-and-ELK.git
+cd Real-Time-Cloth-Price-Prediction-System-using-Prometheus-and-ELK
+2️⃣ Start All Services
+css
+Copy code
+docker compose up --build
+3️⃣ Open Dashboards
+Service	URL
+Kibana	http://localhost:5601
+Elasticsearch	http://localhost:9200
+Prometheus	http://localhost:9090
+Metrics Exporter	http://localhost:8000/metrics
 
-monitoring cloth price trends
+📌 Use Cases
+This system is ideal for:
 
-decision-making for procurement, sourcing, and forecasting
+Cloth market price monitoring
 
-Helps users visualize current vs predicted cloth prices with both ML and monitoring tools.
+Textile industry analytics
+
+Supply chain & procurement planning
+
+Business forecasting
+
+Research & academic projects
+
+Any application requiring real-time prediction + visualization
+
